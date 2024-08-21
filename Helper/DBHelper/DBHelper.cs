@@ -18,11 +18,7 @@ namespace ForeignExchangeRate.Helper.DBHelper
             try
             {
                 DynamicParameters dynamicParameters = new DynamicParameters();
-                //dynamicParameters.Add("@return_value", 0, DbType.Int32, ParameterDirection.ReturnValue);
-                GetDynamicParameters(ref dynamicParameters, ref request);
-                //dynamicParameters.Add("@QueryStartTime", "2024-06-20", DbType.DateTime2);
-                //dynamicParameters.Add("@QueryEndTime", "2024-07-20", DbType.DateTime2);
-                //dynamicParameters.Add("@TargetCurrency", "USD", DbType.String);
+                GetDynamicParameters(ref dynamicParameters, ref request);                
                 using (SqlConnection sqlConnection = new SqlConnection(_connectionString))
                 {
                     IEnumerable<TResult> entities = await sqlConnection.QueryAsync<TResult>(spName, dynamicParameters, commandType: CommandType.StoredProcedure, commandTimeout: 30);

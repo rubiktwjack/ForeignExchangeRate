@@ -8,7 +8,7 @@
 
         public string TargetCurrency { get; set; }
 
-        public string ExchangeRate { get; set; }
+        public float ExchangeRate { get; set; }
 
     }
 }

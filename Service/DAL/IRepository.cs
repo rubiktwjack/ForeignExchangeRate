@@ -8,5 +8,7 @@ namespace ForeignExchangeRate.Service.DAL
         Task<List<SP_SelectCurrencyExchangeRateResponse>> SP_SelectCurrencyExchangeRate(SP_SelectCurrencyExchangeRateRequest request);
 
         Task<List<SP_SelectCurrencyNameMappingResponse>> SP_SelectCurrencyNameMapping(SP_SelectCurrencyNameMappingRequest request);
+
+        Task<List<SP_InsertCurrencyExchangeRateResponse>> SP_InsertCurrencyExchangeRate(SP_InsertCurrencyExchangeRateRequest request);
     }
 }

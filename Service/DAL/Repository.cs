@@ -25,5 +25,12 @@ namespace ForeignExchangeRate.Service.DAL
                 await _dbHelper.ExecuteSP<SP_SelectCurrencyNameMappingRequest, SP_SelectCurrencyNameMappingResponse>("[dbo].[SelectCurrencyNameMapping]", request);
             return response;
         }
+
+        public async Task<List<SP_InsertCurrencyExchangeRateResponse>> SP_InsertCurrencyExchangeRate(SP_InsertCurrencyExchangeRateRequest request)
+        {
+            List<SP_InsertCurrencyExchangeRateResponse> response =
+                await _dbHelper.ExecuteSP<SP_InsertCurrencyExchangeRateRequest, SP_InsertCurrencyExchangeRateResponse>("[dbo].[InsertCurrencyExchangeRate]", request);
+            return response;
+        }
     }
 }

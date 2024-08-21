@@ -77,7 +77,7 @@ namespace ForeignExchangeRate.Service.BLL
                             {
                                 Date = x.Date.ToString("yyyy-MM-dd"),
                                 OriginalCurrency = x.OriginalCurrency,
-                                ExchangeRate = float.Parse(x.ExchangeRate)
+                                ExchangeRate = x.ExchangeRate
                             }));
             foreach (var item in result.CurrencyExchangeRateList)
             {
@@ -95,6 +95,32 @@ namespace ForeignExchangeRate.Service.BLL
 
             }
             result.CurrencyExchangeRateList = result.CurrencyExchangeRateList.OrderBy(x => x.Date).ToList();
+
+            //移除重複及非目標幣別後新增
+            exchangeRateMappings = exchangeRateMappings.Where(x => x.TargetCurrency == request.TargetCurrency).ToList();
+            for (int i = exchangeRateMappings.Count - 1; i >= 0; i--)
+            {
+                if (sp_SelectCurrencyExchangeRateResponse
+                        .Any(x => x.TargetCurrency == exchangeRateMappings[i].TargetCurrency &&
+                                  x.OriginalCurrency == exchangeRateMappings[i].OriginalCurrency &&
+                                  x.ExchangeRate == exchangeRateMappings[i].ExchangeRate &&
+                                  x.Date == exchangeRateMappings[i].Date))
+                {
+                    exchangeRateMappings.RemoveAt(i);
+                }
+            }
+
+            foreach (var exchangeRateMapping in exchangeRateMappings)
+            {
+                SP_InsertCurrencyExchangeRateRequest sp_InsertCurrencyExchangeRateRequest = new SP_InsertCurrencyExchangeRateRequest()
+                {
+                    Date = exchangeRateMapping.Date,
+                    OriginalCurrency = exchangeRateMapping.OriginalCurrency,
+                    TargetCurrency = exchangeRateMapping.TargetCurrency,
+                    ExchangeRate = exchangeRateMapping.ExchangeRate,
+                };
+                List<SP_InsertCurrencyExchangeRateResponse> sp_InsertCurrencyExchangeRateResponse = await _repository.SP_InsertCurrencyExchangeRate(sp_InsertCurrencyExchangeRateRequest);
+            }
 
             return result;
         }
@@ -128,7 +154,7 @@ namespace ForeignExchangeRate.Service.BLL
                         Date = DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture),
                         TargetCurrency = targetCurrency,
                         OriginalCurrency = originalCurrency,
-                        ExchangeRate = value.ToString()
+                        ExchangeRate = float.Parse(value.ToString())
                     });
                 }
             });
