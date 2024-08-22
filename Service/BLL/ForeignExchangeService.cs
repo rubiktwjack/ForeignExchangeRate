@@ -9,6 +9,9 @@ using System.Reflection;
 
 namespace ForeignExchangeRate.Service.BLL
 {
+    /// <summary>
+    /// 負責處理所有業務邏輯
+    /// </summary>
     public class ForeignExchangeService : IForeignExchangeService
     {
         private readonly IRepository _repository;
@@ -17,14 +20,22 @@ namespace ForeignExchangeRate.Service.BLL
             _repository = repository;
         }
 
+        /// <summary>
+        /// 查詢並設定匯率
+        /// 查詢所有匯率，並根據回應的資料更新DB
+        /// </summary>
+        /// <param name="request">查詢與設定匯率的請求參數</param>
+        /// <returns>結果</returns>
         public async Task<GetAndSetCurrencyExchangeRateResponse> GetAndSetCurrencyExchangeRate(GetAndSetCurrencyExchangeRateRequest request)
         {
+            // 初始化result
             GetAndSetCurrencyExchangeRateResponse result = new GetAndSetCurrencyExchangeRateResponse()
             {
                 TargetCurrency = request.TargetCurrency,
                 CurrencyExchangeRateList = new List<CurrencyExchangeRate>()
             };
 
+            // 查詢目標幣種對應中文名稱
             SP_SelectCurrencyNameMappingRequest sp_SelectCurrencyNameMappingRequest = new SP_SelectCurrencyNameMappingRequest()
             {
             };
@@ -42,6 +53,7 @@ namespace ForeignExchangeRate.Service.BLL
                 result.TargetCurrencyName = "DB未有對應中文名稱";
             }
 
+            // 查詢既有匯率資料
             SP_SelectCurrencyExchangeRateRequest sp_SelectCurrencyExchangeRateRequest = new SP_SelectCurrencyExchangeRateRequest()
             {
                 //to do auto mapper
@@ -51,6 +63,7 @@ namespace ForeignExchangeRate.Service.BLL
             };
             List<SP_SelectCurrencyExchangeRateResponse> sp_SelectCurrencyExchangeRateResponse = await _repository.SP_SelectCurrencyExchangeRate(sp_SelectCurrencyExchangeRateRequest);
 
+            // 過濾並加入既有匯率資料
             result.CurrencyExchangeRateList
                 .AddRange(sp_SelectCurrencyExchangeRateResponse
                             .Where(x => x.Date >= request.QueryStartTime && x.Date <= request.QueryEndTime)
@@ -65,9 +78,10 @@ namespace ForeignExchangeRate.Service.BLL
             string baseUrl = "https://openapi.taifex.com.tw/";
             string resouseUrl = "v1/DailyForeignExchangeRates";
             string resquestBody = null;
-            IRestResponse<List<ExchangeRate>> apiResponse = await APIHealper.Call<List<ExchangeRate>>(baseUrl, resouseUrl, resquestBody);
+            IRestResponse<List<ExchangeRate>> apiResponse = await APIHelper.Call<List<ExchangeRate>>(baseUrl, resouseUrl, resquestBody);
             List<ExchangeRateMapping> exchangeRateMappings = ExchangeRateMappings(apiResponse.Data);
 
+            // 外部 API 取得的匯率資料
             result.CurrencyExchangeRateList
                 .AddRange(exchangeRateMappings
                             .Where(x => x.TargetCurrency == request.TargetCurrency &&
@@ -79,6 +93,8 @@ namespace ForeignExchangeRate.Service.BLL
                                 OriginalCurrency = x.OriginalCurrency,
                                 ExchangeRate = x.ExchangeRate
                             }));
+
+            // 設定既有匯率資料的中文名稱
             foreach (var item in result.CurrencyExchangeRateList)
             {
                 if (sp_SelectCurrencyNameMappingResponse.Any(x => x.Currency == item.OriginalCurrency))
@@ -125,6 +141,11 @@ namespace ForeignExchangeRate.Service.BLL
             return result;
         }
 
+        /// <summary>
+        /// 將API 取得的匯率資料轉換成 ExchangeRateMapping 物件
+        /// </summary>
+        /// <param name="exchangeRate">API 取得的匯率資料</param>
+        /// <returns>轉換完成物件</returns>
         public List<ExchangeRateMapping> ExchangeRateMappings(List<ExchangeRate> exchangeRate)
         {
             List<ExchangeRateMapping> result = new List<ExchangeRateMapping>();
@@ -145,6 +166,7 @@ namespace ForeignExchangeRate.Service.BLL
                     }
                     else
                     {
+                        // 根據屬性名稱擷取目標幣別及原始幣別
                         targetCurrency = name.Substring(0, 3);
                         originalCurrency = name.Substring(name.Length - 3);
                     }
