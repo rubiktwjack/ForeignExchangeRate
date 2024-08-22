@@ -1,7 +1,6 @@
 USE [ForeignExchangeRate]
 GO
 
-/****** Object:  Table [dbo].[CurrencyNameMapping]    Script Date: 2024/8/17 ¤U¤È 02:40:52 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -13,5 +12,14 @@ CREATE TABLE [dbo].[CurrencyNameMapping](
 	[Name] [nvarchar](10) NOT NULL
 ) ON [PRIMARY]
 GO
+
+CREATE TABLE [dbo].[CurrencyExchangeRate](
+	[Date] [datetime2](7) NOT NULL,
+	[OriginalCurrency] [nchar](3) NOT NULL,
+	[TargetCurrency] [nchar](3) NOT NULL,
+	[ExchangeRate] [float] NOT NULL
+) ON [PRIMARY]
+GO
+
 
 

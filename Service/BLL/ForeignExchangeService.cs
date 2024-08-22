@@ -161,5 +161,43 @@ namespace ForeignExchangeRate.Service.BLL
 
             return result;
         }
+
+        public async Task<AddCurrencyResponse> AddCurrency(AddCurrencyRequest request)
+        {
+            SP_AddCurrencyRequest sp_AddCurrencyRequest = new SP_AddCurrencyRequest()
+            {
+                Currency = request.Currency,
+                Name = request.Name,
+            };
+            List<SP_AddCurrencyResponse> sp_AddCurrencyResponse = await _repository.SP_AddCurrency(sp_AddCurrencyRequest);
+
+            AddCurrencyResponse response = new AddCurrencyResponse();
+            return response;
+        }
+
+        public async Task<UpdateCurrencyResponse> UpdateCurrency(UpdateCurrencyRequest request)
+        {
+            SP_UpdateCurrencyRequest sp_UpdateCurrencyRequest = new SP_UpdateCurrencyRequest()
+            {
+                Currency = request.Currency,
+                Name = request.Name,
+            };
+            List<SP_UpdateCurrencyResponse> sp_UpdateCurrencyResponse = await _repository.SP_UpdateCurrency(sp_UpdateCurrencyRequest);
+
+            UpdateCurrencyResponse response = new UpdateCurrencyResponse();
+            return response;
+        }
+
+        public async Task<DeleteCurrencyResponse> DeleteCurrency(DeleteCurrencyRequest request)
+        {
+            SP_DeleteCurrencyRequest sp_DeleteCurrencyRequest = new SP_DeleteCurrencyRequest()
+            {
+                Currency = request.Currency,             
+            };
+            List<SP_DeleteCurrencyResponse> sp_DeleteCurrencyResponse = await _repository.SP_DeleteCurrency(sp_DeleteCurrencyRequest);
+
+            DeleteCurrencyResponse response = new DeleteCurrencyResponse();
+            return response;
+        }
     }
 }
